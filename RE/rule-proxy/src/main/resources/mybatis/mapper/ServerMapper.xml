@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.ServerMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.Server">
+        <id column="server_id" property="serverId"/>
+        <result column="server_name" property="serverName"/>
+        <result column="akka_path" property="akkaPath"/>
+        <result column="version" property="version"/>
+        <result column="version_status" property="versionStatus"/>
+    </resultMap>
+
+    <sql id="Table">server</sql>
+
+    <select id="getServer" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        <include refid="Table"/>
+
+        <if test="serverId != null" >
+         where   server_id = #{serverId}
+        </if>
+
+    </select>
+
+    <select id="checkServer" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        <include refid="Table"/>
+        WHERE VERSION = #{version}
+    </select>
+
+    <update id="saveServer">
+        INSERT INTO
+        <include refid="Table"/>
+        (server_name ,akka_path,version,version_status)
+        values
+        (#{serverName},#{akkaPath},#{version},#{versionStatus})
+    </update>
+
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.SqlTemplateMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.SqlTemplate">
+        <id column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="type" property="type"/>
+        <result column="template" property="sql"/>
+    </resultMap>
+
+    <sql id="Table">sql_template</sql>
+
+    <sql id="ColumnList">
+        id, parent_id, type, template
+    </sql>
+
+    <select id="getSqlTemplateByParentId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE version = #{version} and parent_id = #{parentId}
+    </select>
+</mapper>

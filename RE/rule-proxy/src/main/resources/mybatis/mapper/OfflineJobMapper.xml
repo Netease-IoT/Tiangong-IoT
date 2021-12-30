@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.OfflineJobMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.OfflineJob">
+        <id column="job_id" property="id"/>
+        <id column="job_name" property="jobName"/>
+        <result column="code" property="sql"/>
+        <result column="conf" property="conf"/>
+        <result column="version" property="version"/>
+        <result column="creator" property="userId"/>
+        <result column="editor" property="editorId"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="product" property="product"/>
+        <result column="create_time" property="createTime"/>
+        <result column="edit_time" property="editTime"/>
+        <result column="deploy_time" property="deployTime"/>
+        <result column="deploy_note" property="deployNote"/>
+        <result column="start_time" property="startTime"/>
+        <result column="savepoint_path" property="savePointPath"/>
+        <result column="cluster_id" property="clusterId"/>
+        <result column="server_id" property="serverId"/>
+        <result column="version_status" property="versionStatus"/>
+        <result column="operating_status" property="operatingStatus"/>
+
+    </resultMap>
+
+    <sql id="Table">offline_job</sql>
+
+    <sql id="ColumnList">
+        job_id, job_name, code, conf, version, creator, editor, type, status, product, create_time, edit_time, deploy_time, deploy_note, start_time, jar_path, savepoint_path, flink_job_id, cluster_id,server_id,version_status
+    </sql>
+
+    <select id="getJobList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+    </select>
+
+    <select id="getJobListByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+    </select>
+
+    <select id="getJobListCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+    </select>
+
+    <select id="getJobDetail" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE job_id=#{jobId}
+    </select>
+
+    <insert id="createJob">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, job_name, code, conf, version, creator, editor, type, status, product, create_time, edit_time,cluster_id,server_id,version_status)
+        VALUES
+        (#{jobId},#{fileName},#{sql}, "{}", "0", #{creator}, #{creator}, 1, -1, #{product}, #{createTime},
+        #{createTime},#{clusterId},#{serverId},#{versionStatus})
+    </insert>
+
+    <update id="saveJob">
+        update
+        <include refid="Table"/>
+        SET
+        code = #{sql}, version = version + 1, editor = #{editor}, edit_time = #{editTime},cluster_id=${clusterId},server_id = #{serverId},version_status = #{versionStatus}
+        WHERE
+        job_id = #{jobId} and type = 1
+    </update>
+
+    <update id="saveOldJob">
+        update
+        <include refid="Table"/>
+        SET
+        code = #{sql}, version = version + 1, editor = #{editor}, edit_time = #{editTime}
+        WHERE
+        job_id = #{jobId} and type = 1
+    </update>
+
+    <update id="setJobConf">
+        update
+        <include refid="Table"/>
+        SET
+        conf = #{conf}, version = version + 1, editor = #{editor}, edit_time = #{editTime}
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="setJobClusterId">
+        update
+        <include refid="Table"/>
+        SET
+        version = version + 1, editor = #{editor}, edit_time = #{editTime}, cluster_id = #{clusterId},server_id = #{serverId}
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="setJobStatus">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        status = #{status}
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="updateStartTime">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        start_time = #{startTime}
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="updateVersion">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        version = version + 1
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <delete id="deleteJob">
+        DELETE FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId}
+    </delete>
+
+    <select id="batchGetJob" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+        and job_id IN
+        <foreach collection="jobList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="searchJobByJobNameByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE job_name like "%"#{jobName}"%"
+        AND product=#{product} and status != -9
+    </select>
+
+    <select id="searchJobByJobNameCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+        SELECT
+        count(1)
+        FROM
+        <include refid="Table"/>
+        WHERE job_name like "%"#{jobName}"%"
+        AND product=#{product} and status != -9
+    </select>
+
+    <update id="updateJob">
+        UPDATE
+        <include refid="Table" />
+        SET
+        <if test="status != null">
+            status = #{status}
+        </if>
+        <if test="flinkJobId != null">
+            ,flink_job_id = #{flinkJobId}
+        </if>
+        <if test="savePointPath != null" >
+            ,savepoint_path = #{savePointPath}
+        </if>
+        <if test="jarPath != null" >
+            ,jar_path = #{jarPath}
+        </if>
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="saveSavePointToOffLine">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        savepoint_path = #{savePointPath}
+        WHERE
+        job_id = #{jobId}
+    </update>
+    <update id="cleanConf">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        conf = '{}'
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="updateOperatingStatus">
+        update
+        <include refid="Table"/>
+        set operating_status = #{updateStatus}
+        where job_id = #{jobId}
+        and operating_status = #{checkStatus}
+    </update>
+
+</mapper>
+

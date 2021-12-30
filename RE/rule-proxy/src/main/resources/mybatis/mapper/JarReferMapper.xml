@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.JarReferMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.JarRefer">
+        <id column="job_id" property="jobId"/>
+        <result column="jar_id" property="jarId"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <sql id="Table">job_refer_jar</sql>
+
+    <sql id="ColumnList">
+        job_id, jar_id, type
+    </sql>
+
+    <insert id="addReference">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, jar_id, type)
+        VALUES
+        (#{jobId}, #{jarId}, #{type})
+    </insert>
+
+    <delete id="delReference">
+        DELETE FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId} and (jar_id = #{jarId} or #{jarId} = "-1") and type = #{type}
+    </delete>
+
+    <select id="getJobJarList" resultMap="BaseResultMap">
+      SELECT
+        *
+      FROM
+        <include refid="Table"/>
+      WHERE
+        job_id = #{jobId} and type=#{type}
+    </select>
+
+    <select id="getJobIdList" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        <include refid="Table"/>
+        WHERE
+        jar_id = #{jarId} and type=#{type}
+    </select>
+</mapper>

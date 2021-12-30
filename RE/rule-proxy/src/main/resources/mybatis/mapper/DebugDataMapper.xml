@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.DebugDataMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.DebugData">
+        <id column="job_id" property="jobId"/>
+        <id column="table_name" property="tableName"/>
+        <result column="data" property="data"/>
+    </resultMap>
+
+    <sql id="Table">debug_data</sql>
+
+    <sql id="ColumnList">
+       job_id, table_name, data
+    </sql>
+
+    <select id="getDebugDataList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE job_id = #{jobId}
+        AND table_name IN
+        <foreach collection="tableNames" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="saveDebugDataList">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, table_name, data)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.jobId}, #{item.tableName}, #{item.data})
+        </foreach>
+    </insert>
+
+    <delete id="deleteDebugDataList">
+        DELETE FROM
+        <include refid="Table"/>
+        WHERE job_id IN
+        <foreach collection="jobIdList" item="item"  open="(" separator="," close=")">
+          #{item.jobId}
+        </foreach>
+    </delete>
+</mapper>

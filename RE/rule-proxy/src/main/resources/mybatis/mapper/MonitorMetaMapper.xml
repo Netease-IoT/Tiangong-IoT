@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.MonitorMetaMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.MonitorMeta">
+        <result column="job_id" property="jobId"/>
+        <result column="alarm_group" property="group"/>
+        <result column="mail_list" property="mailList"/>
+        <result column="receive_type" property="receiveType"/>
+        <result column="alarm_interval" property="alarmInterval"/>
+        <result column="threshold" property="threshold"/>
+    </resultMap>
+
+    <sql id="Table">monitor_meta</sql>
+
+    <sql id="ColumnList">
+        job_id, alarm_group, mail_list, receive_type, alarm_interval, threshold
+    </sql>
+
+    <select id="getMeta" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId}
+    </select>
+
+    <select id="selectByGroup" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        <include refid="Table"/>
+        WHERE
+        alarm_group = #{group}
+    </select>
+
+    <select id="getAllMeta" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        <include refid="Table"/>
+    </select>
+
+    <update id="createDefaultMeta">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, mail_list)
+        VALUES
+        (#{jobId}, #{mailList})
+        ON DUPLICATE KEY UPDATE
+        mail_list = #{mailList}
+    </update>
+
+    <update id="setMonitorMeta">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, alarm_group, mail_list, receive_type, alarm_interval, threshold)
+        VALUES
+        (#{jobId}, #{group}, #{mailList}, #{alarmTypes}, #{interval}, #{threshold})
+        ON DUPLICATE KEY UPDATE
+        alarm_group = #{group}, mail_list = #{mailList}, receive_type = #{alarmTypes}, alarm_interval = #{interval}, threshold = #{threshold}
+    </update>
+
+    <update id="updateMonitorGroup">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        mail_list = #{mailList}
+        WHERE
+        alarm_group = #{group}
+    </update>
+
+    <delete id="deleteMeta">
+        DELETE FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId}
+    </delete>
+
+</mapper>
+

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.IotOfflineJobMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.OfflineJob">
+        <id column="job_id" property="id"/>
+        <id column="job_name" property="jobName"/>
+        <result column="code" property="sql"/>
+        <result column="conf" property="conf"/>
+        <result column="version" property="version"/>
+        <result column="creator" property="userId"/>
+        <result column="editor" property="editorId"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="product" property="product"/>
+        <result column="create_time" property="createTime"/>
+        <result column="edit_time" property="editTime"/>
+        <result column="deploy_time" property="deployTime"/>
+        <result column="deploy_note" property="deployNote"/>
+        <result column="start_time" property="startTime"/>
+        <result column="savepoint_path" property="savePointPath"/>
+        <result column="cluster_id" property="clusterId"/>
+        <result column="server_id" property="serverId"/>
+        <result column="version_status" property="versionStatus"/>
+        <result column="operating_status" property="operatingStatus"/>
+
+        <result column="rule_description" property="ruleDescription"/>
+        <result column="source_type" property="sourceType"/>
+        <result column="source_json" property="sourceJson"/>
+        <result column="sink_type" property="sinkType"/>
+        <result column="sink_json" property="sinkJson"/>
+        <result column="prepare_sql" property="prepareSql"/>
+
+    </resultMap>
+
+    <sql id="Table">offline_job</sql>
+
+    <sql id="ColumnList">
+        job_id, job_name, code, conf, version, creator, editor, type, status, product, create_time, edit_time, deploy_time, deploy_note, start_time, jar_path, savepoint_path, flink_job_id, cluster_id,server_id,version_status,
+        operating_status,rule_description,source_type,source_json,sink_type,sink_json,prepare_sql
+    </sql>
+
+
+    <insert id="createJob">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, job_name, conf, version, type, status, product,creator,editor,create_time,
+        edit_time,cluster_id,server_id,version_status,operating_status,
+        rule_description,source_type,source_json,sink_type,sink_json,prepare_sql)
+        VALUES
+        (#{jobId},#{jobName},#{conf}, "0", 1, -1, #{product},#{product},#{product},#{createTime},
+        #{createTime},#{clusterId},#{serverId},"1",0,
+        #{ruleDescription},#{sourceType},#{sourceJson},#{sinkType},#{sinkJson},#{prepareSql})
+    </insert>
+
+    <select id="checkRuleName" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        <include refid="Table"/>
+        WHERE JOB_NAME = #{jobName} AND PRODUCT = #{product}
+        <if test="jobId != null">
+            AND JOB_ID != #{jobId}
+        </if>
+    </select>
+
+    <select id="checkJobId" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        <include refid="Table"/>
+        WHERE JOB_ID = #{jobId}
+    </select>
+
+    <update id="updateJob">
+        UPDATE
+        <include refid="Table"/>
+        SET edit_time = #{editTime},prepare_sql = #{prepareSql},source_type = #{sourceType} ,job_name = #{ruleName},
+        source_json = #{sourceJson},sink_type = #{sinkType},sink_json = #{sinkJson} , rule_description =
+        #{ruleDescription}
+        WHERE JOB_ID = #{jobId}
+    </update>
+
+    <update id="updateOperatingStatus">
+        update
+        <include refid="Table"/>
+        set operating_status = #{updateStatus}
+        where job_id = #{jobId}
+        and operating_status = #{checkStatus}
+    </update>
+
+    <update id="updateSql">
+        update
+        <include refid="Table"/>
+        set code = #{sql}
+        where job_id = #{jobId}
+    </update>
+
+    <select id="getDetail" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        where job_id = #{jobId}
+        <if test="product != null">
+            AND product = #{product}
+        </if>
+    </select>
+
+    <select id="searchJobByJobNameByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        a.job_id, a.job_name,a.rule_description, a.create_time,a.edit_time, b.status
+        FROM
+            offline_job a left join online_job b on a.job_id = b.job_id
+        WHERE a.product=#{product}
+        <if test="jobName != null">
+            AND a.job_name like "%"#{jobName}"%"
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="searchJobByJobNameCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+        SELECT
+        count(1)
+        FROM
+        <include refid="Table"/>
+        a
+        WHERE a.product=#{product}
+        <if test="jobName != null">
+            AND a.job_name like "%"#{jobName}"%"
+        </if>
+    </select>
+
+    <delete id="deleteJob">
+        delete from
+        <include refid="Table"/>
+        where job_id = #{jobId}
+    </delete>
+
+</mapper>

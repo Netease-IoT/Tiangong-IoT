@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package pb;
+
+service MQTTGRPC{
+  rpc Connect(ConnReq) returns (Response) {}
+
+  rpc Disconnect(DiscReq) returns (Response) {}
+
+  rpc Subscribe(SubReq) returns (SubRes) {}
+
+  rpc Unsubscribe(UnsubReq) returns (Response) {}
+
+  rpc Publish(PubReq) returns (Response) {}
+}
+
+message DeviceCred {
+  string productKey = 1;
+  string deviceName = 2;
+}
+
+message ConnReq {
+  DeviceCred cred = 1;
+  string token = 2;
+  bool cleanSession = 3;
+}
+
+message Response {
+  bool succeed = 1;
+}
+
+message DiscReq {
+  DeviceCred cred = 1;
+  bool cleanSession = 2;
+  bool hasWill = 3;
+  string msgId = 4;
+  string willTopic = 5;
+  int32 willQos = 6;
+  string willMessage = 7;
+}
+
+message SubReq {
+  DeviceCred cred = 1;
+  repeated string topicFilters = 2;
+  repeated int32 qoss = 3;
+}
+
+message SubRes {
+  repeated int32 qoss = 1;
+}
+
+message UnsubReq {
+  DeviceCred cred = 1;
+  repeated string topicFilters = 2;
+}
+
+message PubReq {
+  DeviceCred cred = 1;
+  string msgId = 2;
+  string topic = 3;
+  int32 qos = 4;
+  string content = 5;
+  int64 timestamp = 6;
+}

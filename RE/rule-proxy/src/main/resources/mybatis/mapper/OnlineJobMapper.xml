@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.OnlineJobMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.OnlineJob">
+        <id column="job_id" property="id"/>
+        <id column="job_name" property="jobName"/>
+        <result column="deployed_sql" property="deployedSql"/>
+        <result column="executed_sql" property="executedSql"/>
+        <result column="conf" property="conf"/>
+        <result column="version" property="version"/>
+        <result column="creator" property="userId"/>
+        <result column="editor" property="editorId"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="product" property="product"/>
+        <result column="create_time" property="createTime"/>
+        <result column="edit_time" property="editTime"/>
+        <result column="state_edit_time" property="stateEditTime"/>
+        <result column="deploy_time" property="deployTime"/>
+        <result column="deploy_note" property="deployNote"/>
+        <result column="start_time" property="startTime"/>
+        <result column="jar_path" property="jarPath"/>
+        <result column="savepoint_path" property="savePointPath"/>
+        <result column="flink_job_id" property="flinkJobId"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="cluster_id" property="clusterId"/>
+        <result column="server_id" property="serverId"/>
+        <result column="version_status" property="versionStatus"/>
+    </resultMap>
+
+    <sql id="Table">online_job</sql>
+    <sql id="ClusterTable">cluster_config</sql>
+
+    <sql id="ColumnList">
+        job_id, job_name, deployed_sql, executed_sql, conf, version, creator, editor, type, status, product, create_time, edit_time, state_edit_time, deploy_time, deploy_note, start_time, jar_path, savepoint_path, flink_job_id,application_id, cluster_id,server_id,version_status
+    </sql>
+
+    <select id="getJobListByType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+    </select>
+
+    <select id="getJobList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+    </select>
+
+    <select id="getAllOldJobs" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE  version_status = 0
+    </select>
+
+    <select id="getJobListByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+    </select>
+
+    <select id="getJobListCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+    </select>
+
+    <select id="getJobDetail" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE job_id=#{jobId}
+    </select>
+
+    <select id="getJobDetailByFlinkJobId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE flink_job_id=#{flinkJobId}
+    </select>
+
+    <select id="getJobDetailByName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE job_name=#{jobName} and product = #{product}
+    </select>
+
+    <select id="getJobClusterId" resultType="java.lang.Integer">
+        SELECT
+        cluster_id
+        FROM
+        <include refid="Table"/>
+        WHERE job_id=#{jobId}
+    </select>
+
+    <update id="deployJob">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, job_name, deployed_sql, executed_sql, conf, version, creator, editor, type, status, product, create_time, edit_time,
+        deploy_time, deploy_note, cluster_id,server_id ,version_status,savepoint_path)
+        VALUES
+        (
+        #{jobId}, #{jobName}, #{deployedSql}, #{deployedSql}, #{conf}, #{version}, #{creator}, #{editor},
+        2, -1, #{product}, #{createTime}, #{editTime}, #{deployTime}, #{deployNote}, #{clusterId},#{serverId}, ${versionStatus},#{savePointPath}
+        )
+    </update>
+
+    <update id="reDeployJob">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        job_name = #{jobName},
+        deployed_sql = #{deployedSql},
+        conf = #{conf},
+        version = #{version},
+        creator = #{creator},
+        editor = #{editor},
+        product = #{product},
+        create_time = #{createTime},
+        edit_time = #{editTime},
+        deploy_time = #{deployTime},
+        deploy_note = #{deployNote},
+        cluster_id = #{clusterId},
+        server_id = #{serverId},
+        version_status = #{versionStatus}
+        WHERE
+        job_id = #{jobId}
+        AND status NOT IN
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+    </update>
+
+    <update id="setJobStatus">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        status = #{status},state_edit_time = #{stateEditTime}
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="setJobStatusByFlinkJobId">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        status = #{status},state_edit_time = #{stateEditTime}
+        WHERE
+        flink_job_id = #{flinkJobId}
+    </update>
+
+    <update id="removeJob">
+        DELETE FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="updateStartTime">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        start_time = #{startTime}, state_edit_time = #{stateEditTime}
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <delete id="deleteJob">
+        DELETE FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId}
+    </delete>
+
+    <select id="batchGetJob" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product} and status != -9
+        and job_id IN
+        <foreach collection="jobList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="searchJobByJobNameByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE job_name like "%"#{jobName}"%"
+        AND product = #{product}
+    </select>
+
+    <select id="searchJobByJobNameCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+        SELECT
+        count(1)
+        FROM
+        <include refid="Table"/>
+        WHERE job_name like "%"#{jobName}"%"
+        AND product=#{product} and status != -9
+    </select>
+
+    <update id="updateJobAfterStartSuccessfully">
+        UPDATE
+        <include refid="Table" />
+        SET
+        executed_sql = deployed_sql,state_edit_time = #{stateEditTime}
+        <if test="status != null">
+            ,status = #{status}
+        </if>
+        <if test="flinkJobId != null">
+            ,flink_job_id = #{flinkJobId}
+        </if>
+        <if test="savePointPath != null" >
+            ,savepoint_path = #{savePointPath}
+        </if>
+        <if test="jarPath != null" >
+            ,jar_path = #{jarPath}
+        </if>
+        <if test="applicationId != null" >
+            ,application_id = #{applicationId}
+        </if>
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+    <update id="saveSavePointToOffLine">
+        UPDATE
+        <include refid="Table"/>
+        SET
+          savepoint_path = #{savePointPath}
+        WHERE
+        job_id = #{jobId} AND type = #{type}
+    </update>
+
+    <select id="getNewVersionWebUi" resultType="java.util.Map">
+        SELECT
+        a.flink_job_id,
+        a.status,
+        CONCAT(
+        b.yarn_path,
+        a.application_id
+        ) AS web_ui
+        FROM
+        <include refid="Table"/> a
+        LEFT JOIN
+        <include refid="ClusterTable"/> b
+        ON a.cluster_id = b.cluster_id
+        WHERE
+        a.product = #{product} and
+        a.application_id IS NOT NULL
+        and a.version_status = 1
+    </select>
+
+    <update id="updateSql">
+        update
+        <include refid="Table"/>
+        set deployed_sql = #{sql} , executed_sql = #{sql}
+        where job_id = #{jobId}
+
+    </update>
+
+    <update id="iotDeployJob">
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, job_name, deployed_sql, executed_sql, conf, version, creator, editor, type, status, product, create_time, edit_time,
+        deploy_time, deploy_note, cluster_id,server_id ,version_status,savepoint_path)
+        VALUES
+        (
+        #{jobId}, #{jobName}, #{deployedSql}, #{deployedSql}, #{conf}, #{version}, #{creator}, #{editor},
+        2, -1, #{product}, #{createTime}, #{editTime}, #{deployTime}, #{deployNote}, #{clusterId},#{serverId}, ${versionStatus},#{savePointPath}
+        )
+    </update>
+
+
+    <update id="iotReDeployJob">
+        UPDATE
+        <include refid="Table"/>
+        SET
+        job_name = #{jobName},
+        editor = #{editor},
+        product = #{product},
+        edit_time = #{editTime},
+        deploy_time = #{deployTime},
+        deployed_sql = #{deployedSql},
+        executed_sql = #{executedSql}
+        WHERE
+        job_id = #{jobId}
+        AND status NOT IN
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+    </update>
+
+    <select id="iotOnlineJobCount" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        <include refid="Table"/>
+        WHERE PRODUCT = #{product} AND STATUS = '2'
+    </select>
+</mapper>

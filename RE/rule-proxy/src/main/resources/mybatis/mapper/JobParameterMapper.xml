@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.JobParameterMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.JobParameter">
+        <id column="rank_index" property="rankIndex"/>
+        <result column="key_name" property="keyName"/>
+        <result column="default_val" property="defaultVal"/>
+        <result column="value_type" property="valueType"/>
+        <result column="needed" property="isNeeded"/>
+        <result column="description" property="description" />
+    </resultMap>
+
+    <sql id="Table">rule_parameter</sql>
+
+    <sql id="ColumnList">
+        rank_index, key_name, default_val, value_type, needed, description
+    </sql>
+
+    <select id="getJobConfParameterList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+    </select>
+</mapper>

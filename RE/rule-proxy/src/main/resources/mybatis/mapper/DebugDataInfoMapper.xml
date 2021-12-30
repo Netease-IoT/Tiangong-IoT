@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.DebugDataInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.DebugDataInfo">
+        <id column="job_id" property="jobId"/>
+        <id column="table_name" property="tableName"/>
+        <id column="last_topic" property="lastTopic"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Table">debug_datainfo</sql>
+
+    <sql id="ColumnList">
+        job_id, table_name, last_topic, update_time
+    </sql>
+
+    <insert id="insertDebugDataInfo" >
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, table_name, last_topic)
+        VALUES (#{jobId}, #{tableName}, #{lastTopic})
+    </insert>
+
+    <update id="updateDebugDataInfo">
+        UPDATE
+        <include refid="Table"/>
+        SET table_name = #{tableName}, last_topic = #{lastTopic}
+        WHERE job_id = #{jobId}
+    </update>
+
+    <select id="getDebugDataInfo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList" />
+        FROM
+        <include refid="Table"/>
+        WHERE job_id = #{jobId} AND table_name = #{tableName}
+    </select>
+
+    <select id="batchGetDebugDataInfo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList" />
+        FROM
+        <include refid="Table"/>
+        WHERE
+        job_id = #{jobId} AND
+        table_name IN
+        <foreach collection="tableNames" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="batchRepalceIntoDebugDataInfo" >
+        REPLACE INTO
+        <include refid="Table"/>
+        (job_id, table_name, last_topic)
+        VALUES
+        <foreach collection="dataList" item="item" separator=",">
+            (#{item.jobId}, #{item.tableName}, #{item.lastTopic})
+        </foreach>
+    </insert>
+
+</mapper>

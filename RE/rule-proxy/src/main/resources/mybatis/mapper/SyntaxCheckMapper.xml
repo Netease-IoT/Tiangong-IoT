@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.SyntaxCheckMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.SyntaxCheck">
+        <id column="job_id" property="jobId"/>
+        <id column="user_id" property="userId"/>
+        <id column="raw_sql" property="rawSql"/>
+        <id column="table_message" property="tableMessage"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Table">syntax_check</sql>
+
+    <sql id="ColumnList">
+        job_id, user_id, raw_sql, table_message, update_time
+    </sql>
+
+    <insert id="insertSyntaxMessage" >
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, user_id, raw_sql, table_message)
+        VALUES (#{jobId}, #{userId}, #{rawSql}, #{tableMessage})
+    </insert>
+
+    <update id="updateSyntaxMessage">
+        UPDATE
+        <include refid="Table"/>
+        SET raw_sql = #{rawSql}, table_message = #{tableMessage}
+        WHERE job_id = #{jobId} AND user_id = #{userId}
+    </update>
+
+    <select id="getSyntaxCheckMessage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList" />
+        FROM
+        <include refid="Table"/>
+        WHERE job_id = #{jobId} AND user_id = #{userId}
+    </select>
+</mapper>

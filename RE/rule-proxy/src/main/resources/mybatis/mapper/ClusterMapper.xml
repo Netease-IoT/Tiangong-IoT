@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.netease.iot.rule.proxy.mapper.ClusterMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.Cluster">
+        <id column="cluster_id" property="id"/>
+        <id column="cluster_name" property="clusterName"/>
+        <result column="product" property="product"/>
+        <result column="akka_config" property="akkaConfig"/>
+        <result column="akka_path" property="akkaPath"/>
+        <result column="cluster_url" property="clusterUrl"/>
+        <result column="cluster_port" property="clusterPort"/>
+        <result column="cluster_web_ui" property="clusterWebUi"/>
+        <result column="is_ha" property="isHA"/>
+        <result column="app_id" property="appId"/>
+        <result column="server_description" property="serverDescription"/>
+        <result column="cluster_description" property="clusterDescription"/>
+    </resultMap>
+
+    <sql id="Table">cluster</sql>
+
+    <sql id="ColumnList">
+        cluster_id, cluster_name, product, akka_config, akka_path, cluster_url, cluster_port, cluster_web_ui, is_ha, app_id, server_description, cluster_description
+    </sql>
+
+    <select id="getCluster" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList"/>
+        FROM
+        <include refid="Table"/>
+        WHERE product=#{product}
+    </select>
+
+    <select id="getClusterById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList" />
+        FROM
+        <include refid="Table"/>
+        WHERE cluster_id = #{clusterId}
+    </select>
+    <select id="getDistinctClusterWebUrls" resultType="java.lang.String">
+        SELECT
+        DISTINCT(cluster_web_ui)
+        FROM
+        <include refid="Table"/>
+    </select>
+    <select id="getClusterIdByWebUrl" resultType="java.lang.Integer">
+        SELECT
+        cluster_id
+        FROM
+        <include refid="Table"/>
+        WHERE cluster_web_ui = #{clusterWebUi}
+    </select>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.ClusterConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.ClusterConfig">
+        <id column="cluster_id" property="clusterId"/>
+        <result column="cluster_name" property="clusterName"/>
+        <result column="resource_path" property="resourcePath"/>
+        <result column="yarn_path" property="yarnPath"/>
+        <result column="flink_path" property="flinkPath"/>
+        <result column="cpk_path" property="cpkPath"/>
+        <result column="yarn_name" property="yarnName"/>
+        <result column="is_public" property="isPublic"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <sql id="Table">cluster_config</sql>
+
+    <select id="getClusters" resultMap="BaseResultMap">
+    SELECT
+        *
+    FROM
+        <include refid="Table"/>
+    WHERE
+        is_public = 1
+    OR (
+        cluster_id IN (
+            SELECT
+                cluster_id
+            FROM
+                product_private_cluster
+            WHERE
+                product_id = (
+                    SELECT
+                        product_id
+                    FROM
+                        product_resource
+                    WHERE
+                        product_name = #{product}
+                )
+        )
+    )
+    </select>
+
+    <select id="getCluster" resultMap="BaseResultMap">
+        SELECT * FROM
+        <include refid="Table"/>
+        WHERE cluster_id = #{clusterId}
+    </select>
+
+
+</mapper>

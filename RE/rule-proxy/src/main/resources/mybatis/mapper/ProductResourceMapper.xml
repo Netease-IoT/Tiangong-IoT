@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.ProductResourceMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.ProductResource">
+        <id column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="total_slot" property="totalSlot"/>
+        <result column="total_mem" property="totalMem"/>
+        <result column="used_slot" property="usedSlot"/>
+        <result column="used_mem" property="usedMem"/>
+    </resultMap>
+
+    <sql id="Table">product_resource</sql>
+
+    <sql id="ColumnList">
+        product_id, product_name,  total_slot, total_mem, used_slot,used_mem
+    </sql>
+
+    <select id="getProductInfo" resultMap="BaseResultMap">
+        select
+        <include refid="ColumnList"/>
+        from
+        <include refid="Table"/>
+        where product_name = #{productName}
+        limit 1
+    </select>
+
+    <update id="updateResource">
+        UPDATE
+        <include refid="Table"/>
+        set used_slot = used_slot + #{nowSlot} , used_mem = used_mem + #{nowMem}
+        where product_id = #{productId}
+    </update>
+
+
+</mapper>

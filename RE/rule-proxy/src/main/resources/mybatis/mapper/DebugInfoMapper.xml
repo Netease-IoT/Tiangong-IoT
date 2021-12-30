@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.netease.iot.rule.proxy.mapper.DebugInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.netease.iot.rule.proxy.domain.DebugInfo">
+        <id column="job_id" property="jobId"/>
+        <id column="session_id" property="sessionId"/>
+        <id column="status" property="status"/>
+        <id column="user_id" property="userId"/>
+        <id column="sql_string" property="sqlString"/>
+        <id column="raw_sql" property="rawSql"/>
+        <id column="source_type" property="sourceType"/>
+        <id column="sink_type" property="sinkType"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Table">debug_info</sql>
+
+    <sql id="ColumnList">
+        job_id, session_id, status, user_id, sql_string, raw_sql, source_type, sink_type, update_time
+    </sql>
+
+    <insert id="insertDebugInfo" >
+        INSERT INTO
+        <include refid="Table"/>
+        (job_id, session_id, status, user_id, sql_string, raw_sql, source_type, sink_type)
+        VALUES (#{jobId}, #{sessionId}, #{status}, #{userId}, #{sqlString}, #{rawSql}, #{sourceType}, #{sinkType})
+    </insert>
+
+    <update id="updateDebugStatus">
+        UPDATE
+        <include refid="Table"/>
+        SET status = #{status}, session_id = #{sessionId}, user_id = #{userId}, sql_string = #{sqlString},
+        raw_sql = #{rawSql}, source_type = #{sourceType}, sink_type = #{sinkType}
+        WHERE job_id = #{jobId}
+    </update>
+
+    <select id="getDebugInfo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="ColumnList" />
+        FROM
+        <include refid="Table"/>
+        WHERE job_id = #{jobId}
+    </select>
+</mapper>

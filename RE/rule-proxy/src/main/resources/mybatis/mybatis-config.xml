@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <properties resource="mybatis.properties"/>
+
+    <typeAliases>
+        <package name="com.netease.iot.rule.proxy.domain"/>
+    </typeAliases>
+
+    <plugins>
+        <plugin interceptor="com.netease.iot.rule.proxy.intercept.PageInterceptor">
+            <property name="limit" value="10"/>
+            <property name="dbType" value="mysql"/>
+        </plugin>
+    </plugins>
+
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper resource="mybatis/mapper/JarFileMapper.xml"/>
+        <mapper resource="mybatis/mapper/JobParameterMapper.xml"/>
+        <mapper resource="mybatis/mapper/OfflineJobMapper.xml"/>
+        <mapper resource="mybatis/mapper/IotOfflineJobMapper.xml"/>
+        <mapper resource="mybatis/mapper/JarReferMapper.xml"/>
+        <mapper resource="mybatis/mapper/ProductResourceMapper.xml"/>
+        <mapper resource="mybatis/mapper/ClusterConfigMapper.xml"/>
+        <mapper resource="mybatis/mapper/ServerMapper.xml"/>
+        <mapper resource="mybatis/mapper/DebugDataMapper.xml" />
+        <mapper resource="mybatis/mapper/SqlTemplateMapper.xml"/>
+        <mapper resource="mybatis/mapper/MonitorMetaMapper.xml"/>
+        <mapper resource="mybatis/mapper/OnlineJobMapper.xml"/>
+        <mapper resource="mybatis/mapper/DebugInfoMapper.xml"/>
+        <mapper resource="mybatis/mapper/DebugDataInfoMapper.xml"/>
+        <mapper resource="mybatis/mapper/SyntaxCheckMapper.xml"/>
+        <mapper resource="mybatis/mapper/ClusterMapper.xml"/>
+        <mapper resource="mybatis/mapper/TenantMapper.xml"/>
+
+    </mappers>
+
+</configuration>
